@@ -36,7 +36,7 @@ app.post('/shorten', async(req, res)=>{
     } else{
         await shortUrl.short(longUrl, (err, url)=>{
             if(err){
-                throw 'Error creating short url'
+                res.status(404).json(err)
             } else{
                 res.status(200).json({
                     longLink: longUrl,
