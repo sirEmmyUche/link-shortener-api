@@ -95,7 +95,7 @@ app.listen(process.env.PORT || 3000, ()=>{
     console.log(`it's working on ${process.env.PORT}`)
 }); 
 
-module.exports = app;
+export default app;
 
 
 // 1. work on storing users password info with hashes
