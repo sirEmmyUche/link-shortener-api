@@ -13,7 +13,6 @@ app.use(bodyParser.json());
 
 const saltRounds = 10;
 
-
 mongoose.connect('mongodb://localhost:27017/linkShorternerUserDB',{useNewUrlParser:true});
 
 const signUpUserSchema = new mongoose.Schema({ 
@@ -94,8 +93,13 @@ app.post('/login', (req, res)=>{
 
 app.post('/signup', async(req, res)=>{
      const { firstName, lastName, password, email} = req.body;
-        
-     await bcrypt.hash(password, saltRounds, function(err, hash) {
+     SignUpUser.findOne({email:email}, (err, FoundResult)=>{
+        if(err){
+            console.log(err)
+        }else if(FoundResult){
+            res.status(404).json("User already exist")
+        }if(!FoundResult){
+            bcrypt.hash(password, saltRounds, function(err, hash) {
         if(err){
             console.log(err)
         }else{
@@ -115,15 +119,20 @@ app.post('/signup', async(req, res)=>{
             })   
         }  
      });
+        }
+     })
+        
 });
 
 
  let port =  process.env.PORT;
  if (port === null || port === ""){
+     port = 3000;
+ }else if (port === undefined){
     port = 3000;
  }  
 app.listen(port, ()=>{
-    console.log(`it's working on ${port}`)
+    console.log(`it's working on port ${port}`)
 }); 
 
 export default app;
