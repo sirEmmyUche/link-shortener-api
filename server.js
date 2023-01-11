@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 
 const saltRounds = 10;
 
-mongoose.connect('mongodb://localhost:27017/linkShorternerUserDB',{useNewUrlParser:true});
+mongoose.connect('mongodb+srv://admin-emmanuel:uche@cluster0.hexan43.mongodb.net/linkShorternerUserDB',{useNewUrlParser:true});
 
 const signUpUserSchema = new mongoose.Schema({ 
     firstName: { type:String,
@@ -26,12 +26,13 @@ const signUpUserSchema = new mongoose.Schema({
     
     email:{
         type: String,
-        required: true,
+        required: [true, "Please provide an email address!"],
+        unique: [true, "Email already exist"]
     },
 
     password:{
         type: String,
-        required: true
+        required: [true, "please provide a password"]
     },
 
     registered: {
@@ -136,3 +137,5 @@ app.listen(port, ()=>{
 }); 
 
 export default app;
+
+// mongo "mongodb+srv://cluster0.hexan43.mongodb.net/myFirstDatabase" --username admin-emmanuel
