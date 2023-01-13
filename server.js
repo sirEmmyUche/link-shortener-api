@@ -138,4 +138,3 @@ app.listen(port, ()=>{
 
 export default app;
 
-// mongo "mongodb+srv://cluster0.hexan43.mongodb.net/myFirstDatabase" --username admin-emmanuel
