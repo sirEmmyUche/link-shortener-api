@@ -138,5 +138,4 @@ app.listen(PORT, ()=>{
     console.log(`it's working on port ${PORT}`)
 }); 
 
-export default app;
 
