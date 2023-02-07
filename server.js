@@ -7,6 +7,8 @@ import mongoose from "mongoose";
 // import passport from "passport-google-oauth20";
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
 app.use(cors());
 
 app.use(bodyParser.json());
@@ -125,15 +127,15 @@ app.post('/signup', async(req, res)=>{
         
 });
 
+// let port =  process.env.PORT;
+// if (port === null || port === ""){
+//     port = 3000;
+// }else if (port === undefined){
+//    port = 3000;
+// }  
 
- let port =  process.env.PORT;
- if (port === null || port === ""){
-     port = 3000;
- }else if (port === undefined){
-    port = 3000;
- }  
-app.listen(port, ()=>{
-    console.log(`it's working on port ${port}`)
+app.listen(PORT, ()=>{
+    console.log(`it's working on port ${PORT}`)
 }); 
 
 export default app;
