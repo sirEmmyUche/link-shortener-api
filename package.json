@@ -21,6 +21,7 @@
     "nodemon": "^2.0.19",
     "passport-google-oauth20": "^2.0.0",
     "shorturl": "^0.0.3",
-    "valid-url": "^1.0.9"
+    "valid-url": "^1.0.9",
+    "vercel": "^28.18.4"
   }
 }

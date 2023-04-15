@@ -56,7 +56,7 @@ app.post('/shorten', async(req, res)=>{
             if(err){
                 res.status(404).json(err)
             } else{
-                res.status(200).json({
+               return res.status(200).json({
                     longLink: longUrl,
                     shortLink: url,
                     date: new Date(),
@@ -76,16 +76,16 @@ app.post('/login', (req, res)=>{
             console.log(err)
         }
         if(!foundUser){
-            res.status(404).json("User not found")
+           return res.status(404).json("User not found")
         }
         if(foundUser){
           bcrypt.compare(password, foundUser.password,  function(err, result){
             if(err){
                 console.log(err)
             }if(result === false){
-                res.status(404).json("Incorrect username and password")
+               return res.status(404).json("Incorrect username and password")
             }if(result === true){
-                res.status(200).json(foundUser.firstName)
+               return res.status(200).json(foundUser.firstName)
             }
         });
         }
@@ -100,7 +100,7 @@ app.post('/signup', async(req, res)=>{
         if(err){
             console.log(err)
         }else if(FoundResult){
-            res.status(404).json("User already exist")
+          return res.status(404).json("User already exist")
         }if(!FoundResult){
             bcrypt.hash(password, saltRounds, function(err, hash) {
         if(err){
@@ -117,7 +117,7 @@ app.post('/signup', async(req, res)=>{
                 if(err){
                     console.log(err)
                 } else{
-                    res.status(200).json("SignUp successful")
+                   return res.status(200).json("SignUp successful")
                 }
             })   
         }  
@@ -126,13 +126,6 @@ app.post('/signup', async(req, res)=>{
      })
         
 });
-
-// let port =  process.env.PORT;
-// if (port === null || port === ""){
-//     port = 3000;
-// }else if (port === undefined){
-//    port = 3000;
-// }  
 
 app.listen(PORT, ()=>{
     console.log(`it's working on port ${PORT}`)
