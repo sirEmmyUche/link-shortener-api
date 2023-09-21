@@ -68,13 +68,18 @@ const uniqueID = get_random_string(value)
 app.post('/shorten', async(req, res)=>{
     const {longUrl} = req.body;
     if(longUrl === ''){
-        return res.status(400).json({message:'Input link is empty'})
+        return res.status(400).json({message:'Input link is empty', status:400})
     } 
     const checkUrl = validateUrl(longUrl);
     if(checkUrl === false){
-        return res.status(400).json({message:"Invalid URL"});
+        return res.status(400).json({message:"Invalid URL", status:400});
     }else{
         let doesUrlExistInDB = await Shortly.findOne({longUrl:longUrl});
+        console.log(doesUrlExistInDB);
+        if(doesUrlExistInDB){
+            return res.status(200).json({shortId:doesUrlExistInDB.shortId,
+            date:doesUrlExistInDB.createdAT, status:200});
+        }
         if(doesUrlExistInDB === null){
             let saveURL = new Shortly({
             longUrl:longUrl,
@@ -83,15 +88,34 @@ app.post('/shorten', async(req, res)=>{
         })
         saveURL.save();
         let result = {
-            id:saveURL._id,
-            id:saveURL.shortId,
-            id:saveURL.longUrl,
-        }
+            id: saveURL._id,
+            shortId: saveURL.shortId,
+            longUrl: saveURL.longUrl,
+            status:200
+          };
         console.log(result) 
         return res.status(200).json(result)
         }
     }
 });
+
+
+app.get('/:shortId', async (req, res) => {
+    const { shortId } = req.params;
+    try {
+      const record = await Shortly.findOne({ shortId });
+      if (record) {
+        // Redirect to the longUrl
+        res.redirect(301, record.longUrl);
+      } else {
+        return res.status(404).json({ message: 'Short URL not found' });
+      }
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  });
+  
 
 
 
