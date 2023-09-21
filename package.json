@@ -11,17 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.0.1",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "express": "^4.18.1",
     "mongoose": "^6.7.2",
-    "node-fetch": "^3.2.10",
-    "node-url-shortener": "^2.0.3",
     "nodemon": "^2.0.19",
-    "passport-google-oauth20": "^2.0.0",
-    "shorturl": "^0.0.3",
-    "valid-url": "^1.0.9",
     "vercel": "^28.18.4"
   }
 }
