@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from "cors";
 import mongoose from "mongoose";
+import { nanoid } from 'nanoid'
 
 
 const app = express();
@@ -47,76 +48,60 @@ const validateUrl = (url)=>{
     }
 }
 
-const char_set = 'abcdefghijlkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-function max_random_number(max) {
-  return Math.floor(Math.random() * max);
-}
-function get_random_string(length) {
-  let random_string = '';
-  for(let i = 0; i < length; i++) {
-    random_string += char_set[max_random_number(char_set.length - 1)];
-  }
-  
-  return random_string;
-}
-
-let value = 5;
-const uniqueID = get_random_string(value)
 
 //shorten long url
-
-app.post('/shorten', async(req, res)=>{
-    const {longUrl} = req.body;
-    if(longUrl === ''){
-        return res.status(400).json({message:'Input link is empty', status:400})
-    } 
-    const checkUrl = validateUrl(longUrl);
-    if(checkUrl === false){
-        return res.status(400).json({message:"Invalid URL", status:400});
-    }else{
-        let doesUrlExistInDB = await Shortly.findOne({longUrl:longUrl});
-        console.log(doesUrlExistInDB);
-        if(doesUrlExistInDB){
-            return res.status(200).json({shortId:doesUrlExistInDB.shortId,
-            date:doesUrlExistInDB.createdAT, status:200});
-        }
-        if(doesUrlExistInDB === null){
-            let saveURL = new Shortly({
-            longUrl:longUrl,
-            shortId: `short.ly/${uniqueID}`,
-            createdAt: new Date()
-        })
-        saveURL.save();
-        let result = {
-            id: saveURL._id,
-            shortId: saveURL.shortId,
-            longUrl: saveURL.longUrl,
-            status:200
-          };
-        console.log(result) 
-        return res.status(200).json(result)
-        }
-    }
+app.post('/shorten', async (req, res) => {
+  //shorten the url
+  const { longUrl } = req.body;
+  if (longUrl === '') {
+    return res.status(400).json({ message: 'Input link is empty', status: 400 });
+  }
+  const checkUrl = validateUrl(longUrl);
+  if (checkUrl === false) {
+    return res.status(400).json({ message: 'Invalid URL', status: 400 });
+  } else {
+    const shortId = nanoid(5);
+    const shortUrl = `http://short.ly/${shortId}`;
+    const saveURL = new Shortly({
+      longUrl: longUrl,
+      shortId: shortId,
+      createdAt: new Date(),
+    });
+    await saveURL.save();
+    let result = {
+      id: saveURL._id,
+      shortId: shortId,
+      longUrl: longUrl,
+      shortUrl: shortUrl,
+      status: 200,
+    };
+    return res.status(200).json(result);
+  }
 });
 
 
 app.get('/:shortId', async (req, res) => {
-    const { shortId } = req.params;
-    try {
-      const record = await Shortly.findOne({ shortId });
-      if (record) {
-        // Redirect to the longUrl
-        res.redirect(301, record.longUrl);
-      } else {
-        return res.status(404).json({ message: 'Short URL not found' });
-      }
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Internal Server Error' });
-    }
-  });
-  
+  // redirect to original url
+  const { shortId } = req.params;
 
+  try {
+    const record = await Shortly.findOne({ shortId });
+    if (record) {
+      // Check if the long URL is valid
+      if (!validateUrl(record.longUrl)) {
+        return res.status(400).json({ message: 'Invalid long URL' });
+      }
+
+      // Redirect to the long URL
+      res.status(301).redirect(record.longUrl);
+    } else {
+      return res.status(404).json({ message: 'Short URL not found' });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 
 app.listen(PORT, ()=>{
