@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from "cors";
 import mongoose from "mongoose";
-import { nanoid } from 'nanoid'
+import { nanoid } from 'nanoid';
 
 
 const app = express();
@@ -60,26 +60,28 @@ app.post('/shorten', async (req, res, next) => {
     if (checkUrl === false) {
       return res.status(400).json({ message: 'Invalid URL', status: 400 });
     } else {
-      const shortId = nanoid(5);
-      const shortUrl = `https://shortit-etr8.onrender.com/${shortId}`;
-      const saveURL = new Shortly({
-        longUrl: longUrl,
-        shortId: shortId,
-        createdAt: new Date(),
-      });
-      await saveURL.save();
-      let result = {
-        id: saveURL._id,
-        shortId: shortId,
-        longUrl: longUrl,
-        shortUrl: shortUrl,
-        status: 200,
+      const checkDBForLongURL = await Shortly.findOne({longUrl: longUrl });
+
+      if(checkDBForLongURL){
+        let shortId = checkDBForLongURL.shortId;
+        const shortUrl = `https://shortit-etr8.onrender.com/${shortId}`;
+        let foundURL = {id:checkDBForLongURL._id, shortUrl:shortUrl}
+        return res.status(200).json(foundURL);
       };
-      return res.status(200).json(result);
+      if(!checkDBForLongURL || checkDBForLongURL===null){
+        const shortId = nanoid(5);
+        const saveURL = new Shortly({longUrl: longUrl,shortId: shortId,createdAt: new Date(),});
+        await saveURL.save();  
+        let result = {
+          id: saveURL._id,
+          shortUrl: `https://shortit-etr8.onrender.com/${saveURL.shortId}`,
+        };
+        return res.status(200).json(result);
+      }
     }
   }catch(err){
     console.log(err)
-    return res.status(500).json({message:"Internal Server Error"})
+    return res.status(500).json({message:"Internal Server Error"});
   }
   next();
 });
@@ -107,7 +109,7 @@ app.get('/:shortId', async (req, res) => {
 
 
 app.listen(PORT, ()=>{
-    console.log(`it's working on port ${PORT}`)
+    console.log(`it's working on port ${PORT}`);
 }); 
 
 
