@@ -50,40 +50,43 @@ const validateUrl = (url)=>{
 
 
 //shorten long url
-app.post('/shorten', async (req, res) => {
-  //shorten the url
+app.post('/shorten', async (req, res, next) => {
   const { longUrl } = req.body;
-  if (longUrl === '') {
-    return res.status(400).json({ message: 'Input link is empty', status: 400 });
+  try{
+    if (longUrl === '') {
+      return res.status(400).json({ message: 'Input link is empty', status: 400 });
+    }
+    const checkUrl = validateUrl(longUrl);
+    if (checkUrl === false) {
+      return res.status(400).json({ message: 'Invalid URL', status: 400 });
+    } else {
+      const shortId = nanoid(5);
+      const shortUrl = `https://shortit-etr8.onrender.com/${shortId}`;
+      const saveURL = new Shortly({
+        longUrl: longUrl,
+        shortId: shortId,
+        createdAt: new Date(),
+      });
+      await saveURL.save();
+      let result = {
+        id: saveURL._id,
+        shortId: shortId,
+        longUrl: longUrl,
+        shortUrl: shortUrl,
+        status: 200,
+      };
+      return res.status(200).json(result);
+    }
+  }catch(err){
+    console.log(err)
+    return res.status(500).json({message:"Internal Server Error"})
   }
-  const checkUrl = validateUrl(longUrl);
-  if (checkUrl === false) {
-    return res.status(400).json({ message: 'Invalid URL', status: 400 });
-  } else {
-    const shortId = nanoid(5);
-    const shortUrl = `http://short.ly/${shortId}`;
-    const saveURL = new Shortly({
-      longUrl: longUrl,
-      shortId: shortId,
-      createdAt: new Date(),
-    });
-    await saveURL.save();
-    let result = {
-      id: saveURL._id,
-      shortId: shortId,
-      longUrl: longUrl,
-      shortUrl: shortUrl,
-      status: 200,
-    };
-    return res.status(200).json(result);
-  }
+  next();
 });
 
 
 app.get('/:shortId', async (req, res) => {
-  // redirect to original url
   const { shortId } = req.params;
-
   try {
     const record = await Shortly.findOne({ shortId });
     if (record) {
@@ -91,7 +94,6 @@ app.get('/:shortId', async (req, res) => {
       if (!validateUrl(record.longUrl)) {
         return res.status(400).json({ message: 'Invalid long URL' });
       }
-
       // Redirect to the long URL
       res.status(301).redirect(record.longUrl);
     } else {
